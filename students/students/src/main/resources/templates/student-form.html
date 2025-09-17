@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Student</title>
+    <meta charset="UTF-8">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
+    <!-- Header -->
+    <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Add Student</h1>
+
+    <!-- Student Form -->
+    <form th:action="@{/students}" th:object="${student}" method="post" class="space-y-4">
+        <!-- Name -->
+        <div>
+            <label class="block text-gray-700 font-medium mb-1">Name</label>
+            <input type="text" th:field="*{name}"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="Enter student name" required>
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label class="block text-gray-700 font-medium mb-1">Email</label>
+            <input type="email" th:field="*{email}"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="Enter student email" required>
+        </div>
+
+        <!-- Submit Button -->
+        <div>
+            <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+                Save Student
+            </button>
+        </div>
+    </form>
+
+    <!-- Back Link -->
+    <div class="text-center mt-6">
+        <a href="/students" class="text-blue-600 hover:underline">← View List</a>
+    </div>
+</div>
+</body>
+</html>
