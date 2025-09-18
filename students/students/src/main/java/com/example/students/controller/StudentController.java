@@ -16,6 +16,7 @@ public class StudentController {
         this.service = service;
     }
 
+    //  Normal student list (for USER & ADMIN if needed)
     @GetMapping
     public String list(Model model) {
         model.addAttribute("students", service.findAll());
@@ -33,4 +34,6 @@ public class StudentController {
         service.save(student);
         return "redirect:/students";
     }
+
+
 }

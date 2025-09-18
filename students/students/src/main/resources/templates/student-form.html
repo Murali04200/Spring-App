@@ -29,18 +29,57 @@
                    placeholder="Enter student email" required>
         </div>
 
-        <!-- Submit Button -->
+        <!-- Course -->
         <div>
-            <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition">
-                Save Student
-            </button>
+            <label class="block text-gray-700 font-medium mb-1">Course</label>
+            <input type="text" th:field="*{course}"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="Enter student course" required>
         </div>
+
+        <!-- Location -->
+        <div>
+            <label class="block text-gray-700 font-medium mb-1">Location</label>
+            <input type="text" th:field="*{location}"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="Enter student location" required>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+                class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition">
+            <!-- Save Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M5 13l4 4L19 7" />
+            </svg>
+            Save Student
+        </button>
     </form>
 
-    <!-- Back Link -->
-    <div class="text-center mt-6">
-        <a href="/students" class="text-blue-600 hover:underline">← View List</a>
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center mt-6 gap-3">
+        <!-- Back to Dashboard -->
+        <a href="/admin/dashboard"
+           class="flex items-center gap-2 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800 px-4 py-2 rounded-lg shadow hover:from-gray-300 hover:to-gray-400 transition">
+            <!-- Home Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 9.75l9-7.5 9 7.5V20.25a1.5 1.5 0 01-1.5 1.5h-15a1.5 1.5 0 01-1.5-1.5V9.75z" />
+            </svg>
+            Dashboard
+        </a>
+
+        <!-- View Student List -->
+        <a href="/students"
+           class="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2 rounded-lg shadow hover:from-pink-600 hover:to-rose-600 transition">
+            <!-- List Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+            View List
+        </a>
     </div>
 </div>
 </body>
