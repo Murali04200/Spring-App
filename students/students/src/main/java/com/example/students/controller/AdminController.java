@@ -26,4 +26,8 @@ public class AdminController {
         model.addAttribute("students", studentService.findAll());
         return "students"; // reuse students.html
     }
+    @GetMapping("/user/dashboard")
+    public String userDashboard() {
+        return "user-dashboard";
+    }
 }

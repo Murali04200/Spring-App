@@ -54,7 +54,7 @@ public class SecurityConfig {
         return (request, response, authentication) -> {
             var authorities = authentication.getAuthorities();
 
-            String redirectUrl = "/students"; // default for user
+            String redirectUrl = "/user/dashboard"; // default for user
 
             if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_admin"))) {
                 redirectUrl = "/admin/dashboard"; // admin → dashboard

@@ -2,6 +2,7 @@ package com.example.students.controller;
 
 import com.example.students.model.Student;
 import com.example.students.service.StudentService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,13 @@ public class StudentController {
     @PostMapping
     public String save(@ModelAttribute Student student) {
         service.save(student);
+        return "redirect:/students";
+    }
+    // ✅ Delete student (only ADMIN)
+    @PreAuthorize("hasRole('ROLE_admin')")
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable Long id) {
+        service.deleteById(id);
         return "redirect:/students";
     }
 

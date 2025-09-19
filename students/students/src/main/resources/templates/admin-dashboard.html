@@ -93,6 +93,17 @@
           opacity: 1;
           filter: blur(2px);
         }
+         /* Logout button */
+        .btn-gradient {
+             background: linear-gradient(90deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-gradient:hover {
+            background: linear-gradient(90deg, #ec4899, #db2777);
+            color: white;
+        }
 
         /* Smooth Inner Gradients */
       /*  .gradient-blue {
@@ -116,6 +127,10 @@
 
 <!-- Sidebar -->
 <div class="sidebar">
+    <a href="/admin/dashboard">
+        <i class="bi bi-house-fill fs-5"></i>
+        <span>Dashboard</span>
+    </a>
     <a href="/admin/students"><i class="bi bi-people-fill"></i> Student List</a>
     <a href="/students/new"><i class="bi bi-person-plus-fill"></i> Add Student</a>
     <a href="/keycloak-users/new"><i class="bi bi-shield-lock-fill"></i> Create User</a>
@@ -125,9 +140,18 @@
 <!-- Page Content -->
 <div class="content">
     <!-- Header -->
-    <nav class="navbar navbar-dark mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="#">✨ Admin Dashboard</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="btn btn-gradient d-flex align-items-center gap-2" th:href="@{/logout}">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
