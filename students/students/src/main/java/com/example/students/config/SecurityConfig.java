@@ -13,7 +13,7 @@ public class SecurityConfig {
 
     private static final String KEYCLOAK_ISSUER = "http://localhost:8080/realms/myrealm";
     private static final String CLIENT_ID = "students-client";
-    private static final String REDIRECT_URI = "http://localhost:8081/oauth2/authorization/keycloak";
+    private static final String REDIRECT_URI = "http://localhost:8081/";
 
     private final CustomOidcUserService customOidcUserService;
 
@@ -26,11 +26,11 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**").permitAll()
-                        .requestMatchers("/students/new").hasRole("ADMIN")
-                        .requestMatchers("/students").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers("/keycloak-users/**").hasRole("ADMIN")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/dashboard").hasRole("ADMIN")
+                        .requestMatchers("/students/new").hasRole("admin") // lowercase
+                        .requestMatchers("/students").hasAnyRole("admin", "user")
+                        .requestMatchers("/keycloak-users/**").hasRole("admin")
+                        .requestMatchers("/admin/**").hasRole("admin")
+                        .requestMatchers("/dashboard").hasRole("admin")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -54,15 +54,13 @@ public class SecurityConfig {
         return (request, response, authentication) -> {
             var authorities = authentication.getAuthorities();
 
-            if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-                response.sendRedirect("/admin/dashboard"); // send ADMIN to dashboard
-            } else if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER"))) {
-                response.sendRedirect("/students"); // send USER to student page
-            } else {
-                response.sendRedirect("/"); // fallback
+            String redirectUrl = "/students"; // default for user
+
+            if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_admin"))) {
+                redirectUrl = "/admin/dashboard"; // admin → dashboard
             }
+
+            response.sendRedirect(redirectUrl);
         };
     }
-
 }
-

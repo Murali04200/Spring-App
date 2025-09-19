@@ -58,7 +58,7 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto align-items-center">
                 <!-- 🔙 Back button (only for Admins) -->
-                <li class="nav-item" sec:authorize="hasAuthority('admin')">
+                <li class="nav-item" sec:authorize="hasAuthority('ROLE_admin')">
                     <a class="btn btn-dashboard me-3 d-flex align-items-center gap-2" th:href="@{/admin/dashboard}">
                         <i class="bi bi-arrow-left-circle"></i> Dashboard
                     </a>
