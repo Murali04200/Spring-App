@@ -27,9 +27,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**").permitAll()
                         .requestMatchers("/students/new").hasRole("admin") // lowercase
+                        .requestMatchers("/students/update/**").hasAnyRole("admin","manager","jrmanager","clerk") // added
+                        .requestMatchers("/students/delete/**").hasAnyRole("admin","manager") //  added
                         .requestMatchers("/students").hasAnyRole("admin", "user")
                         .requestMatchers("/keycloak-users/**").hasRole("admin")
-                        .requestMatchers("/admin/**").hasRole("admin")
+                        .requestMatchers("/admin/**").hasAnyRole("admin","manager","jrmanager")
                         .requestMatchers("/dashboard").hasRole("admin")
                         .anyRequest().authenticated()
                 )
@@ -56,8 +58,12 @@ public class SecurityConfig {
 
             String redirectUrl = "/user/dashboard"; // default for user
 
-            if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_admin"))) {
-                redirectUrl = "/admin/dashboard"; // admin → dashboard
+
+            if (authorities.stream().anyMatch(a ->
+                    a.getAuthority().equals("ROLE_admin") ||
+                            a.getAuthority().equals("ROLE_manager") ||
+                            a.getAuthority().equals("ROLE_jrmanager"))) {
+                redirectUrl = "/admin/dashboard"; // admin, manager, jrmanager → dashboard
             }
 
             response.sendRedirect(redirectUrl);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,7 +57,7 @@
 
         /* Cards with Double Gradient */
         .dashboard-card {
-          min-height: 200px; /* smaller than before */
+          min-height: 200px;
           border-radius: 18px;
           color: black;
           text-align: center;
@@ -93,9 +93,10 @@
           opacity: 1;
           filter: blur(2px);
         }
-         /* Logout button */
+
+        /* Logout button */
         .btn-gradient {
-             background: linear-gradient(90deg, #ef4444, #dc2626);
+            background: linear-gradient(90deg, #ef4444, #dc2626);
             color: white;
             border: none;
             transition: 0.3s;
@@ -106,7 +107,7 @@
         }
 
         /* Smooth Inner Gradients */
-      /*  .gradient-blue {
+        .gradient-blue {
           background: linear-gradient(135deg, #3b82f6, #60a5fa);
         }
         .gradient-soft-pink {
@@ -114,11 +115,11 @@
         }
         .gradient-soft-indigo {
           background: linear-gradient(135deg, #6366f1, #a78bfa);
-        } */
+        }
 
         /* Icons */
         .dashboard-icon {
-          font-size: 2.6rem; /* slightly smaller */
+          font-size: 2.6rem;
           margin-bottom: 8px;
         }
     </style>
@@ -132,14 +133,23 @@
         <span>Dashboard</span>
     </a>
     <a href="/admin/students"><i class="bi bi-people-fill"></i> Student List</a>
+    <a href="/admin/keycloak-users"><i class="bi bi-people-fill"></i> KeycloakUser List</a>
+
     <a href="/students/new"><i class="bi bi-person-plus-fill"></i> Add Student</a>
-    <a href="/keycloak-users/new"><i class="bi bi-shield-lock-fill"></i> Create User</a>
+    <!-- ✅ Fixed link -->
+    <a href="/admin/keycloak-users/new"><i class="bi bi-shield-lock-fill"></i> Create User</a>
     <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
 </div>
 
 <!-- Page Content -->
 <div class="content">
     <!-- Header -->
+    <h1 class="mb-4">
+        <span sec:authorize="hasAuthority('ROLE_admin')">Welcome Admin</span>
+        <span sec:authorize="hasAuthority('ROLE_manager')">Welcome Manager</span>
+        <span sec:authorize="hasAuthority('ROLE_jrmanager')">Welcome JrManager</span>
+        - <span sec:authentication="name"></span>
+    </h1>
     <nav class="navbar navbar-expand-lg navbar-dark mb-4">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="#">✨ Admin Dashboard</a>
@@ -170,7 +180,7 @@
 
             <!-- Card: Create Keycloak User -->
             <div class="col-md-4">
-                <a href="/keycloak-users/new" class="card dashboard-card gradient-soft-pink">
+                <a href="/admin/keycloak-users/new" class="card dashboard-card gradient-soft-pink">
                     <i class="bi bi-shield-lock-fill dashboard-icon"></i>
                     <h5 class="fw-bold">Create User</h5>
                     <p>Add a Keycloak user</p>
@@ -179,10 +189,19 @@
 
             <!-- Card: Student Stats -->
             <div class="col-md-4">
-                <a href="/students" class="card dashboard-card gradient-soft-indigo">
+                <a href="/admin/students" class="card dashboard-card gradient-soft-indigo">
                     <i class="bi bi-bar-chart-fill dashboard-icon"></i>
                     <h5 class="fw-bold">Students</h5>
                     <p>Student Details</p>
+                </a>
+            </div>
+
+            <!-- Card: Keycloak Users -->
+            <div class="col-md-4">
+                <a href="/admin/keycloak-users" class="card dashboard-card gradient-blue">
+                    <i class="bi bi-shield-lock-fill dashboard-icon"></i>
+                    <h5 class="fw-bold">Keycloak Users</h5>
+                    <p>Manage users and roles</p>
                 </a>
             </div>
 

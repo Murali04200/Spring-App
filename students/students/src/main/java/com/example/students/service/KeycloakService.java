@@ -1,6 +1,7 @@
 package com.example.students.service;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -27,7 +28,7 @@ public class KeycloakService {
 
     private String getAdminToken() {
         Map tokenResponse = webClient.post()
-                .uri("/realms/myrealm/protocol/openid-connect/token")
+                .uri("/realms/" + realm + "/protocol/openid-connect/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData("client_id", clientId)
                         .with("client_secret", clientSecret)
@@ -43,7 +44,8 @@ public class KeycloakService {
         return tokenResponse.get("access_token").toString();
     }
 
-    public void createUser(String username, String email, String password, String role) {
+    // Create user and return Keycloak UUID
+    public String createUser(String username, String email, String password, String role) {
         String token = getAdminToken();
 
         // 1. Create user
@@ -94,7 +96,7 @@ public class KeycloakService {
                 .block();
 
         // 3. Assign role
-        String assignedRole = (role == null || role.isBlank()) ? "USER" : role; // ✅ Default to USER if null/empty
+        String assignedRole = (role == null || role.isBlank()) ? "USER" : role;
 
         Map roleObj = webClient.get()
                 .uri("/admin/realms/" + realm + "/roles/{roleName}", assignedRole)
@@ -112,6 +114,112 @@ public class KeycloakService {
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(List.of(roleObj))
+                .retrieve()
+                .toBodilessEntity()
+                .block();
+
+        return userId;
+    }
+
+    // Update user in Keycloak
+    // ✅ Update user in Keycloak (email, role, password)
+    public void updateUser(String userId, String email, String role, String password) {
+        String token = getAdminToken();
+
+        // 1. Update basic user info (NO "id" or "username" field!)
+        Map<String, Object> updatedUser = Map.of(
+                "email", email,
+                "enabled", true,
+                "emailVerified", true
+        );
+
+        // Send update request with error logging
+        webClient.put()
+                .uri("/admin/realms/" + realm + "/users/{id}", userId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchangeToMono(response -> {
+                    if (response.statusCode().is2xxSuccessful()) {
+                        return Mono.empty();
+                    } else {
+                        return response.bodyToMono(String.class)
+                                .flatMap(err -> Mono.error(new RuntimeException(
+                                        "❌ Update failed: " + response.statusCode() + " → " + err
+                                )));
+                    }
+                })
+                .block();
+
+        // 2. Update password if provided
+        if (password != null && !password.isBlank()) {
+            Map<String, Object> passwordPayload = Map.of(
+                    "type", "password",
+                    "value", password,
+                    "temporary", false
+            );
+
+            webClient.put()
+                    .uri("/admin/realms/" + realm + "/users/{id}/reset-password", userId)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(passwordPayload)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        }
+
+        // 3. Handle role update
+        String assignedRole = (role == null || role.isBlank()) ? "USER" : role;
+
+        Map roleObj = webClient.get()
+                .uri("/admin/realms/" + realm + "/roles/{roleName}", assignedRole)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+
+        if (roleObj != null) {
+            // Remove existing roles
+            List<Map> existingRoles = webClient.get()
+                    .uri("/admin/realms/" + realm + "/users/{id}/role-mappings/realm", userId)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToFlux(Map.class)
+                    .collectList()
+                    .block();
+
+            if (existingRoles != null && !existingRoles.isEmpty()) {
+                webClient.method(HttpMethod.DELETE)
+                        .uri("/admin/realms/" + realm + "/users/{id}/role-mappings/realm", userId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(existingRoles)
+                        .retrieve()
+                        .toBodilessEntity()
+                        .block();
+            }
+
+            // Assign new role
+            webClient.post()
+                    .uri("/admin/realms/" + realm + "/users/{id}/role-mappings/realm", userId)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(List.of(roleObj))
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        }
+    }
+
+
+    // Delete user
+    public void deleteUser(String userId) {
+        String token = getAdminToken();
+
+        webClient.delete()
+                .uri("/admin/realms/" + realm + "/users/{id}", userId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .toBodilessEntity()
                 .block();

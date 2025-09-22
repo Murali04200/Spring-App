@@ -10,7 +10,7 @@
     <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Create Keycloak User</h2>
 
     <!-- Form -->
-    <form th:action="@{/keycloak-users}" method="post" class="space-y-4">
+    <form th:action="@{/admin/keycloak-users}" method="post" class="space-y-4">
         <div>
             <label class="block text-gray-700">Username</label>
             <input type="text" name="username" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400" required>
@@ -31,9 +31,9 @@
         <!-- Create User Button -->
         <button type="submit"
                 class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition">
-            <!-- User Plus Icon -->
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m0 14v1m8-9h1M3 12H2m15.364-6.364l.707.707M5.636 18.364l-.707.707M18.364 18.364l.707-.707M5.636 5.636l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 4v1m0 14v1m8-9h1M3 12H2m15.364-6.364l.707.707M5.636 18.364l-.707.707M18.364 18.364l.707-.707M5.636 5.636l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
             Create User
         </button>
@@ -45,23 +45,12 @@
 
     <!-- Navigation Buttons -->
     <div class="flex justify-between items-center mt-6 gap-3">
-        <!-- Back to Dashboard -->
         <a href="/admin/dashboard"
            class="flex items-center gap-2 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800 px-4 py-2 rounded-lg shadow hover:from-gray-300 hover:to-gray-400 transition">
-            <!-- Home Icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75l9-7.5 9 7.5V20.25a1.5 1.5 0 01-1.5 1.5h-15a1.5 1.5 0 01-1.5-1.5V9.75z" />
-            </svg>
             Dashboard
         </a>
-
-        <!-- Back to Add Student -->
         <a href="/students/new"
            class="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2 rounded-lg shadow hover:from-pink-600 hover:to-rose-600 transition">
-            <!-- Student Icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A7.5 7.5 0 0112 15.5a7.5 7.5 0 016.879 2.304M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
             Add Student
         </a>
     </div>

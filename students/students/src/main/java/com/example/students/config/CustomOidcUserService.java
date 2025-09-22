@@ -22,7 +22,7 @@ public class CustomOidcUserService extends OidcUserService {
 
         Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
 
-        // Extract Keycloak realm roles
+        // ✅ Extract Keycloak realm roles
         Map<String, Object> realmAccess = oidcUser.getClaimAsMap("realm_access");
         if (realmAccess != null && realmAccess.get("roles") instanceof List<?> roles) {
             for (Object role : roles) {
@@ -31,9 +31,25 @@ public class CustomOidcUserService extends OidcUserService {
             }
         }
 
+        // ✅ Extract username or full name for display
+        String username = oidcUser.getPreferredUsername(); // usually the Keycloak username
+        if (username == null || username.isBlank()) {
+            username = oidcUser.getFullName(); // fallback to full name
+        }
+        if (username == null || username.isBlank()) {
+            username = oidcUser.getEmail(); // fallback to email
+        }
+
         // Debug log
         System.out.println("👉 Roles from Keycloak: " + mappedAuthorities);
+        System.out.println("👉 Logged in user: " + username);
 
-        return new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo());
+        // ✅ Map "preferred_username" so Thymeleaf can show it
+        return new DefaultOidcUser(
+                mappedAuthorities,
+                oidcUser.getIdToken(),
+                oidcUser.getUserInfo(),
+                "preferred_username"
+        );
     }
 }

@@ -17,31 +17,42 @@ public class StudentController {
         this.service = service;
     }
 
-    //  Normal student list (for USER & ADMIN if needed)
+    // ✅ Show all students
     @GetMapping
     public String list(Model model) {
         model.addAttribute("students", service.findAll());
         return "students";
     }
 
+    // ✅ Show create form (Admin only)
     @GetMapping("/new")
+    @PreAuthorize("hasRole('admin')")
     public String createForm(Model model) {
         model.addAttribute("student", new Student());
         return "student-form";
     }
 
+    // ✅ Save new student (Admin only)
     @PostMapping
+    @PreAuthorize("hasRole('admin')")
     public String save(@ModelAttribute Student student) {
         service.save(student);
         return "redirect:/students";
     }
-    // ✅ Delete student (only ADMIN)
-    @PreAuthorize("hasRole('ROLE_admin')")
+
+    // ✅ Delete student (Admin only)
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Long id) {
         service.deleteById(id);
         return "redirect:/students";
     }
 
-
+    // ✅ Handle update (Admin, Manager, JrManager, Clerk)
+    @PostMapping("/update/{id}")
+    @PreAuthorize("hasAnyRole('admin','manager','jrmanager','clerk')")
+    public String update(@PathVariable Long id, @ModelAttribute Student student) {
+        service.updateStudent(id, student);
+        return "redirect:/students";
+    }
 }

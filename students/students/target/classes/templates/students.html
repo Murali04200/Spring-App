@@ -26,9 +26,7 @@
             background: linear-gradient(90deg, #3b82f6, #60a5fa);
             color: white;
         }
-        /* 🎨 Smart Delete Icon Button */
-        .btn-delete-icon {
-            background: linear-gradient(145deg, #ef4444, #dc2626);
+        .btn-action-icon {
             border: none;
             color: white;
             border-radius: 50%;
@@ -38,12 +36,17 @@
                         -4px -4px 8px rgba(255,255,255,0.3);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .btn-delete-icon:hover {
+        .btn-action-icon:hover {
             transform: scale(1.15);
             box-shadow: 2px 2px 6px rgba(0,0,0,0.35),
                         -2px -2px 6px rgba(255,255,255,0.4);
-            background: linear-gradient(145deg, #dc2626, #b91c1c);
         }
+        .btn-delete { background: linear-gradient(145deg, #ef4444, #dc2626); }
+        .btn-delete:hover { background: linear-gradient(145deg, #dc2626, #b91c1c); }
+        .btn-update { background: linear-gradient(145deg, #374151, #111827); }
+        .btn-update:hover { background: linear-gradient(145deg, #111827, #000000); }
+        .btn-print { background: linear-gradient(145deg, #3b82f6, #2563eb); }
+        .btn-print:hover { background: linear-gradient(145deg, #2563eb, #1d4ed8); }
     </style>
 </head>
 <body>
@@ -56,18 +59,18 @@
         </a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto align-items-center">
-                <!-- 🔙 Back button (only for Admins) -->
-                <li class="nav-item" sec:authorize="hasAuthority('ROLE_admin')">
+                <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_admin','ROLE_manager','ROLE_jrmanager')">
                     <a class="btn btn-warning fw-bold me-3 d-flex align-items-center gap-2" th:href="@{/admin/dashboard}">
                         <i class="bi bi-arrow-left-circle"></i> Dashboard
                     </a>
+                </li>
+
                 </li>
                 <li class="nav-item" sec:authorize="hasAuthority('ROLE_user')">
                     <a class="btn btn-warning fw-bold me-3 d-flex align-items-center gap-2" th:href="@{/user/dashboard}">
                         <i class="bi bi-arrow-left-circle"></i> Dashboard
                     </a>
                 </li>
-                <!-- Logout -->
                 <li class="nav-item">
                     <a class="btn btn-danger fw-bold d-flex align-items-center gap-2" th:href="@{/logout}">
                         <i class="bi bi-box-arrow-right"></i> Logout
@@ -102,14 +105,29 @@
                     <td th:text="${student.course}"></td>
                     <td th:text="${student.location}"></td>
                     <td>
-                        <!-- Smart Delete Icon (Admin Only) -->
-                        <button class="btn-delete-icon"
-                                sec:authorize="hasRole('ROLE_admin')"
+                        <button class="btn-action-icon btn-delete"
+                                sec:authorize="hasAnyRole('ROLE_admin','ROLE_manager')"
                                 data-bs-toggle="modal"
                                 data-bs-target="#confirmDeleteModal"
                                 th:attr="data-student-id=${student.id}">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
+                        <button class="btn-action-icon btn-update ms-2"
+                                sec:authorize="hasAnyRole('ROLE_admin','ROLE_manager','ROLE_jrmanager','ROLE_clerk')"
+                                data-bs-toggle="modal"
+                                data-bs-target="#updateStudentModal"
+                                th:attr="data-student-id=${student.id},
+                                         data-student-name=${student.name},
+                                         data-student-email=${student.email},
+                                         data-student-course=${student.course},
+                                         data-student-location=${student.location}">
+                            <i class="bi bi-pencil-fill"></i>
+                        </button>
+                        <a class="btn-action-icon btn-print ms-2"
+                           sec:authorize="hasAnyRole('ROLE_admin','ROLE_manager','ROLE_jrmanager','ROLE_clerk','ROLE_user')"
+                           th:href="@{'/students/print/' + ${student.id}}">
+                            <i class="bi bi-printer-fill"></i>
+                        </a>
                     </td>
                 </tr>
                 </tbody>
@@ -118,13 +136,13 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+<!-- Delete Modal -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title" id="confirmDeleteLabel"><i class="bi bi-exclamation-triangle-fill"></i> Confirm Delete</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 ⚠️ Are you sure you want to delete this student? This action cannot be undone.
@@ -139,19 +157,78 @@
     </div>
 </div>
 
+<!-- Update Modal -->
+<div class="modal fade" id="updateStudentModal" tabindex="-1" aria-labelledby="updateStudentLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form id="updateStudentForm" method="post" th:action="@{/students/update/__id__}">
+                <!-- ✅ CSRF Token -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="updateStudentLabel"><i class="bi bi-pencil-fill"></i> Update Student</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="update-id" name="id">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" id="update-name" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="update-email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Course</label>
+                        <input type="text" id="update-course" name="course" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Location</label>
+                        <input type="text" id="update-location" name="location" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark"><i class="bi bi-check-circle-fill"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const deleteModal = document.getElementById("confirmDeleteModal");
-      const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+        const deleteModal = document.getElementById("confirmDeleteModal");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 
-      deleteModal.addEventListener("show.bs.modal", function (event) {
-        const button = event.relatedTarget;
-        const studentId = button.getAttribute("data-student-id");
-        confirmDeleteBtn.setAttribute("href", "/students/delete/" + studentId);
-      });
+        deleteModal.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+            const studentId = button.getAttribute("data-student-id");
+            confirmDeleteBtn.setAttribute("href", "/students/delete/" + studentId);
+        });
+
+        const updateModal = document.getElementById("updateStudentModal");
+        const updateForm = document.getElementById("updateStudentForm");
+
+        updateModal.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute("data-student-id");
+            const name = button.getAttribute("data-student-name");
+            const email = button.getAttribute("data-student-email");
+            const course = button.getAttribute("data-student-course");
+            const location = button.getAttribute("data-student-location");
+
+            document.getElementById("update-id").value = id;
+            document.getElementById("update-name").value = name;
+            document.getElementById("update-email").value = email;
+            document.getElementById("update-course").value = course;
+            document.getElementById("update-location").value = location;
+
+            updateForm.setAttribute("action", "/students/update/" + id);
+        });
     });
 </script>
 
