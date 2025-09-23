@@ -26,7 +26,7 @@ public class StudentController {
 
     // ✅ Show create form (Admin only)
     @GetMapping("/new")
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasAnyRole('admin','manager')")
     public String createForm(Model model) {
         model.addAttribute("student", new Student());
         return "student-form";
@@ -34,7 +34,7 @@ public class StudentController {
 
     // ✅ Save new student (Admin only)
     @PostMapping
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('admin','manager')")
     public String save(@ModelAttribute Student student) {
         service.save(student);
         return "redirect:/students";
@@ -46,6 +46,15 @@ public class StudentController {
     public String delete(@PathVariable Long id) {
         service.deleteById(id);
         return "redirect:/students";
+    }
+
+    // ✅ Show update form (Admin, Manager, JrManager, Clerk)
+    @GetMapping("/edit/{id}")
+    @PreAuthorize("hasAnyRole('admin','manager','jrmanager','clerk')")
+    public String editForm(@PathVariable Long id, Model model) {
+        Student student = service.findById(id); // Make sure findById exists in service
+        model.addAttribute("student", student);
+        return "student-edit-form"; // Or use modal integration
     }
 
     // ✅ Handle update (Admin, Manager, JrManager, Clerk)

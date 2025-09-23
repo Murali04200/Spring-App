@@ -64,9 +64,7 @@
                         <i class="bi bi-arrow-left-circle"></i> Dashboard
                     </a>
                 </li>
-
-                </li>
-                <li class="nav-item" sec:authorize="hasAuthority('ROLE_user')">
+                <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_user','ROLE_clerk')">
                     <a class="btn btn-warning fw-bold me-3 d-flex align-items-center gap-2" th:href="@{/user/dashboard}">
                         <i class="bi bi-arrow-left-circle"></i> Dashboard
                     </a>
@@ -83,6 +81,13 @@
 
 <!-- Content -->
 <div class="container mt-5">
+
+    <!-- ✅ Success Message -->
+    <div id="successMessage" class="alert alert-success alert-dismissible fade show d-none" role="alert">
+        <span id="successText"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
     <h2 class="mb-4 text-center fw-bold text-dark">Student List</h2>
     <div class="card">
         <div class="card-body">
@@ -162,7 +167,6 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="updateStudentForm" method="post" th:action="@{/students/update/__id__}">
-                <!-- ✅ CSRF Token -->
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title" id="updateStudentLabel"><i class="bi bi-pencil-fill"></i> Update Student</h5>
@@ -203,13 +207,32 @@
     document.addEventListener("DOMContentLoaded", function () {
         const deleteModal = document.getElementById("confirmDeleteModal");
         const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+        const successMessage = document.getElementById("successMessage");
+        const successText = document.getElementById("successText");
 
+        // ✅ Delete Handler
         deleteModal.addEventListener("show.bs.modal", function (event) {
             const button = event.relatedTarget;
             const studentId = button.getAttribute("data-student-id");
             confirmDeleteBtn.setAttribute("href", "/students/delete/" + studentId);
+
+            confirmDeleteBtn.onclick = function (e) {
+                e.preventDefault();
+                fetch("/students/delete/" + studentId, {method: "DELETE"})
+                    .then(res => {
+                        if (res.ok) {
+                            const row = [...document.querySelectorAll("table tbody tr")]
+                                .find(r => r.cells[0].innerText === studentId);
+                            if (row) row.remove();
+                            showSuccess("Student deleted successfully ✅");
+                            sortTable();
+                        }
+                    });
+                bootstrap.Modal.getInstance(deleteModal).hide();
+            };
         });
 
+        // ✅ Update Handler
         const updateModal = document.getElementById("updateStudentModal");
         const updateForm = document.getElementById("updateStudentForm");
 
@@ -229,6 +252,50 @@
 
             updateForm.setAttribute("action", "/students/update/" + id);
         });
+
+        updateForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const formData = new FormData(updateForm);
+            const id = formData.get("id");
+
+            fetch(updateForm.action, {
+                method: "POST",
+                body: formData
+            }).then(res => {
+                if (res.ok) {
+                    const row = [...document.querySelectorAll("table tbody tr")]
+                        .find(r => r.cells[0].innerText === id);
+                    if (row) {
+                        row.children[1].innerText = formData.get("name");
+                        row.children[2].innerText = formData.get("email");
+                        row.children[3].innerText = formData.get("course");
+                        row.children[4].innerText = formData.get("location");
+                    }
+                    showSuccess("Student updated successfully ✅");
+                    sortTable();
+                }
+            });
+            bootstrap.Modal.getInstance(updateModal).hide();
+        });
+
+        // ✅ Show success message
+        function showSuccess(msg) {
+            successText.innerText = msg;
+            successMessage.classList.remove("d-none");
+            setTimeout(() => successMessage.classList.add("d-none"), 3000);
+        }
+
+        // ✅ Sort table by ID ascending
+        function sortTable() {
+            const table = document.querySelector("table tbody");
+            const rows = Array.from(table.rows);
+            rows.sort((a, b) => {
+                return parseInt(a.cells[0].innerText) - parseInt(b.cells[0].innerText);
+            });
+            rows.forEach(row => table.appendChild(row));
+        }
+
+        sortTable(); // initial sort on load
     });
 </script>
 

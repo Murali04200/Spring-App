@@ -3,6 +3,7 @@ package com.example.students.controller;
 import com.example.students.model.KeycloakUser;
 import com.example.students.service.KeycloakService;
 import com.example.students.service.KeycloakUserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -61,13 +62,21 @@ public class KeycloakUserController {
         }
     }
 
-    // ✅ Update user (email, role, password)
+    // ✅ Update user with role-based restriction
     @PostMapping("/update/{id}")
     public String updateUser(@PathVariable Long id,
                              @RequestParam String email,
                              @RequestParam String role,
-                             @RequestParam(required = false) String password) {
+                             @RequestParam(required = false) String password,
+                             Authentication authentication) {
+
         KeycloakUser user = keycloakUserService.findById(id);
+        String loggedInRole = authentication.getAuthorities().iterator().next().getAuthority().toLowerCase();
+
+        // jrmanager can only update email & password
+        if (loggedInRole.equals("role_jrmanager")) {
+            role = user.getRole(); // prevent changing role
+        }
 
         // Update in Keycloak
         keycloakService.updateUser(user.getKeycloakId(), email, role, password);
@@ -75,15 +84,12 @@ public class KeycloakUserController {
         // Update in local DB
         user.setEmail(email);
         user.setRole(role);
-
-        // ❌ Do NOT store password in DB (only update in Keycloak)
         keycloakUserService.save(user);
 
         return "redirect:/admin/keycloak-users";
     }
 
-
-    // ✅ Delete user
+    // ✅ Delete user (admin & manager only)
     @PostMapping("/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
         KeycloakUser user = keycloakUserService.findById(id);
