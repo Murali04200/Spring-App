@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8">
+    <title>Enter Marks</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+      body { background: linear-gradient(135deg, #eef2ff, #e0f2fe); }
+      .glass-card {
+        background: rgba(255,255,255,0.65);
+        border: 1px solid rgba(255,255,255,0.35);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 16px;
+        box-shadow: 0 10px 24px rgba(0,0,0,.16);
+        overflow: hidden;
+        position: relative;
+      }
+      .glass-card::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+        filter: blur(10px);
+        opacity: .35;
+        z-index: -1;
+      }
+      .section-title {
+        display:flex; align-items:center; gap:10px; margin-bottom:10px;
+      }
+      .title-badge {
+        width:36px; height:36px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;
+        background: linear-gradient(135deg,#7c3aed,#2563eb); color:#fff; box-shadow:0 6px 14px rgba(0,0,0,.15);
+      }
+      .btn {
+        display: flex; align-items: center; gap: 5px;
+      }
+      .btn-gradient {
+        background: linear-gradient(135deg,#2563eb,#7c3aed);
+        color: #fff;
+        border: none;
+        box-shadow: 0 6px 14px rgba(37,99,235,.35);
+      }
+      .btn-gradient:hover { filter: brightness(.98); color:#fff; }
+      /* Custom action buttons */
+      .btn-save {
+        background: linear-gradient(135deg,#22c55e,#16a34a);
+        color:#fff; border:none; box-shadow:0 8px 18px rgba(34,197,94,.35);
+      }
+      .btn-save:hover { filter:brightness(.97); color:#fff; }
+      .btn-view {
+        background: linear-gradient(135deg,#06b6d4,#3b82f6);
+        color:#fff; border:none; box-shadow:0 8px 18px rgba(59,130,246,.35);
+      }
+      .btn-view:hover { filter:brightness(.97); color:#fff; }
+      .btn-update {
+        background: linear-gradient(135deg,#f59e0b,#f97316);
+        color:#fff; border:none; box-shadow:0 6px 14px rgba(249,115,22,.35);
+      }
+      .btn-update:hover { filter:brightness(.97); color:#fff; }
+    </style>
+  </head>
+<body class="bg-light">
+<nav class="navbar navbar-dark" style="background: linear-gradient(90deg,#0ea5e9,#22c55e); box-shadow:0 6px 16px rgba(0,0,0,.18);">
+  <div class="container py-2">
+    <div class="d-flex align-items-center w-100">
+      <div style="width:120px"></div>
+      <div class="flex-grow-1 text-center">
+        <h5 class="text-white mb-0">Teacher Marks</h5>
+      </div>
+      <div class="d-flex gap-2 justify-content-end" style="width:120px">
+        <a class="btn btn-gradient btn-sm d-inline-flex align-items-center gap-1"
+           th:href="@{/admin/dashboard}"
+           sec:authorize="hasAnyAuthority('PERM_A','PERM_B','PERM_C','PERM_D','PERM_E','PERM_F','PERM_G','PERM_H','PERM_I')">
+          <i class="bi bi-speedometer2"></i>
+          Dashboard
+        </a>
+        <a class="btn btn-gradient btn-sm d-inline-flex align-items-center gap-1"
+           th:href="@{/user/dashboard}"
+           sec:authorize="!hasAnyAuthority('PERM_A','PERM_B','PERM_C','PERM_D','PERM_E','PERM_F','PERM_G','PERM_H','PERM_I')">
+          <i class="bi bi-speedometer2"></i>
+          Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="container mt-4">
+  <!-- Success Alerts -->
+  <div th:if="${param.saved}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-1"></i>
+    Mark saved successfully.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <div th:if="${param.updated}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-1"></i>
+    Mark updated successfully.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <div class="card glass-card shadow">
+    <div class="card-body">
+      <div class="section-title">
+        <span class="title-badge"><i class="bi bi-journal-check"></i></span>
+        <h5 class="mb-0">Enter Subject Marks</h5>
+      </div>
+      <form th:action="@{/teacher/marks}" method="post" class="row g-3">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <!-- Redirect back with success flag after save -->
+                <input type="hidden" name="redirectTo" value="/teacher/marks?saved=1" />
+                <!-- Class filter -->
+                <div class="col-md-3">
+                  <label class="form-label">Class</label>
+                  <select class="form-select" id="classSelect">
+                    <option value="" selected>All Classes</option>
+                    <!-- options populated by JS from students list -->
+                  </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Student</label>
+                    <select class="form-select" name="studentId" required>
+                        <option value="" disabled selected>Choose student</option>
+                        <option th:each="s: ${students}"
+                                th:value="${s.id}"
+                                th:text="${s.name} + ' (' + ${s.className} + ')'"
+                                th:attr="data-class=${s.className}">S</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Subject</label>
+                    <div th:if="${fixedSubjectCode != null}">
+                        <input type="hidden" name="subjectCode" th:value="${fixedSubjectCode}" />
+                        <input type="text" class="form-control" th:value="${#lists.isEmpty(subjects) ? fixedSubjectCode : subjects.get(0).name + ' (' + fixedSubjectCode + ')'}" readonly>
+                        <div class="form-text">Locked to your subject</div>
+                    </div>
+                    <div th:if="${fixedSubjectCode == null}">
+                        <select class="form-select" id="subjectSelect" name="subjectCode" required>
+                            <option value="" disabled selected>Choose subject</option>
+                            <option th:each="sub: ${subjects}" th:value="${sub.code}" th:text="${sub.name} + ' (' + ${sub.code} + ')'">Sub</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Teacher</label>
+                    <div th:if="${fixedTeacherEmail != null}">
+                        <input type="hidden" name="teacherEmail" th:value="${fixedTeacherEmail}" />
+                        <input type="text" class="form-control" th:value="${fixedTeacherEmail}" readonly>
+                        <div class="form-text">Locked to your account</div>
+                    </div>
+                    <div th:if="${fixedTeacherEmail == null}">
+                        <select class="form-select" id="teacherSelect" name="teacherEmail" required>
+                            <option value="" disabled selected>Choose teacher</option>
+                            <option th:each="t: ${teachers}" th:value="${t.email}" th:text="${t.name} + ' (' + ${t.subjectCode} + ')'">T</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Mark</label>
+                    <input type="number" class="form-control" name="mark" min="0" max="100" required />
+                </div>
+                <div class="col-12 d-flex gap-2">
+                  <button type="submit" class="btn btn-save">
+                    <i class="bi bi-check2-circle"></i> Save
+                  </button>
+                  <button type="button" class="btn btn-view" data-bs-toggle="modal" data-bs-target="#viewMarksModal">
+                    <i class="bi bi-eye-fill"></i> View Entered Marks
+                  </button>
+                </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+<!-- View Marks Modal -->
+<div class="modal fade" id="viewMarksModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content glass-card">
+      <div class="modal-header" style="background: linear-gradient(90deg,#2563eb,#7c3aed); color:#fff;">
+        <h5 class="modal-title">Your Subject Marks</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div th:if="${#lists.isEmpty(teacherMarks)}" class="alert alert-info mb-0">No marks yet for your subject.</div>
+        <div class="table-responsive" th:if="${!#lists.isEmpty(teacherMarks)}">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Subject</th>
+                <th>Mark</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="m,iter : ${teacherMarks}">
+                <td th:text="${iter.index + 1}">1</td>
+                <td th:text="${m.student.id}">ID</td>
+                <td th:text="${m.student.name}">Name</td>
+                <td th:text="${m.subject.name} + ' (' + ${m.subject.code} + ')'">Subject</td>
+                <td th:text="${m.mark}">0</td>
+                <td>
+                  <button class="btn btn-sm btn-update" data-bs-toggle="modal" th:data-bs-target="${'#editMarkModal-' + m.id}">
+                    <i class="bi bi-pencil-square"></i> Update
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Update Modals for each mark -->
+<div th:each="m : ${teacherMarks}">
+  <div class="modal fade" th:id="${'editMarkModal-' + m.id}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form th:action="@{/teacher/marks}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <!-- Redirect back with success flag after update -->
+          <input type="hidden" name="redirectTo" value="/teacher/marks?updated=1" />
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title">Update Mark</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-2">
+              <label class="form-label">Student</label>
+              <input type="text" class="form-control" th:value="${m.student.name}" readonly>
+              <input type="hidden" name="studentId" th:value="${m.student.id}">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Subject</label>
+              <input type="text" class="form-control" th:value="${m.subject.name} + ' (' + ${m.subject.code} + ')'" readonly>
+              <input type="hidden" name="subjectCode" th:value="${m.subject.code}">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Teacher</label>
+              <input type="text" class="form-control" th:value="${m.teacher.email}" readonly>
+              <input type="hidden" name="teacherEmail" th:value="${m.teacher.email}">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Mark</label>
+              <input type="number" class="form-control" name="mark" min="0" max="100" th:value="${m.mark}" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  (function(){
+    const subj = document.getElementById('subjectSelect');
+    const teacher = document.getElementById('teacherSelect');
+    const classSelect = document.getElementById('classSelect');
+    const studentSelect = document.querySelector('select[name="studentId"]');
+    function clearTeachers() {
+      while (teacher.options.length > 1) teacher.remove(1);
+    }
+    function loadTeachersForSubject(code){
+      if (!code) return; 
+      fetch('/api/teachers?subjectCode=' + encodeURIComponent(code))
+        .then(r => r.json())
+        .then(arr => {
+          clearTeachers();
+          arr.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.email;
+            opt.textContent = `${t.name} (${t.subjectCode})`;
+            teacher.appendChild(opt);
+          });
+        })
+        .catch(()=>{});
+    }
+    if (subj) {
+      subj.addEventListener('change', function(){
+        loadTeachersForSubject(this.value);
+      });
+    }
+    // Build class list from current students in dropdown
+    function buildClassFilter(){
+      if (!classSelect || !studentSelect) return;
+      const classes = new Set();
+      [...studentSelect.options].forEach(opt => {
+        const cls = opt.getAttribute('data-class');
+        if (cls) classes.add(cls);
+      });
+      // Remove existing dynamic options
+      while (classSelect.options.length > 1) classSelect.remove(1);
+      Array.from(classes).sort().forEach(c => {
+        const o = document.createElement('option');
+        o.value = c; o.textContent = c; classSelect.appendChild(o);
+      });
+    }
+    function filterStudentsByClass(){
+      if (!classSelect || !studentSelect) return;
+      const sel = classSelect.value;
+      [...studentSelect.options].forEach(opt => {
+        if (!opt.value) return; // skip placeholder
+        const cls = opt.getAttribute('data-class') || '';
+        opt.hidden = !!(sel && cls !== sel);
+      });
+      // If current selection is hidden, reset to placeholder
+      const selOpt = studentSelect.selectedOptions[0];
+      if (selOpt && selOpt.hidden) studentSelect.selectedIndex = 0;
+    }
+    if (classSelect) {
+      classSelect.addEventListener('change', function(){
+        filterStudentsByClass();
+        try { localStorage.setItem('marks_classFilter', classSelect.value || ''); } catch(e) {}
+      });
+      buildClassFilter();
+      try {
+        const saved = localStorage.getItem('marks_classFilter');
+        if (saved && [...classSelect.options].some(o => o.value === saved)) {
+          classSelect.value = saved;
+        }
+      } catch(e) {}
+      filterStudentsByClass();
+    }
+    // Auto-open the View Marks modal after update so the user sees the result
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('updated') === '1') {
+      const modal = new bootstrap.Modal(document.getElementById('viewMarksModal'));
+      modal.show();
+      // Clean the query param to avoid reopening on refresh
+      params.delete('updated');
+      const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, '', newUrl);
+    }
+  })();
+</script>
+</body>
+</html>

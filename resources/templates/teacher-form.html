@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Teacher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">Admin</a>
+        <div class="ms-auto">
+            <a class="btn btn-outline-light" th:href="@{/admin/dashboard}">Dashboard</a>
+        </div>
+    </div>
+</nav>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">Create Teacher</div>
+                <div class="card-body">
+                    <div th:if="${param.success}">
+                        <div class="alert alert-success">Teacher saved successfully.</div>
+                    </div>
+                    <form th:action="@{/teacher}" th:object="${teacher}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <div class="mb-3">
+                            <label class="form-label">Select Keycloak Teacher (optional)</label>
+                            <select class="form-select" id="kcTeacherSelect">
+                                <option value="" selected>-- Choose Keycloak teacher --</option>
+                                <option th:each="u : ${kcTeachers}"
+                                        th:value="${u.username} + '||' + ${u.email}"
+                                        th:text="${u.username} + ' (' + ${u.email} + ')'">
+                                </option>
+                            </select>
+                            <div class="form-text">Picking a Keycloak teacher will auto-fill Name and Email.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" th:field="*{name}" id="teacherName" class="form-control" required>
+                        </div>
+                        <div class="mb-2">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="toggleNewSubject">
+                                <label class="form-check-label" for="toggleNewSubject">Create new subject</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Subject (existing)</label>
+                            <select class="form-select" id="existingSubject" th:field="*{subjectCode}" required>
+                                <option value="" disabled selected>Select a subject</option>
+                                <option th:each="s : ${subjects}"
+                                        th:value="${s.code}"
+                                        th:text="${s.name} + ' (' + ${s.code} + ')'">
+                                </option>
+                            </select>
+                            <div class="form-text">Choose an existing subject or toggle 'Create new subject' below.</div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">New Subject Code</label>
+                                <input type="text" class="form-control" id="newSubjectCode" name="newSubjectCode" placeholder="e.g., MATH" disabled>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">New Subject Name</label>
+                                <input type="text" class="form-control" id="newSubjectName" name="newSubjectName" placeholder="e.g., Mathematics" disabled>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" th:field="*{email}" id="teacherEmail" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Class</label>
+                            <div class="dropdown w-100">
+                              <button class="btn btn-outline-secondary w-100 d-flex justify-content-between align-items-center" type="button" id="classDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span id="classDropdownText">Select classes</span>
+                                <i class="bi bi-caret-down-fill"></i>
+                              </button>
+                              <div class="dropdown-menu p-2 w-100" aria-labelledby="classDropdownBtn" style="max-height: 220px; overflow-y: auto;">
+                                <div class="form-check">
+                                  <input class="form-check-input class-opt" type="checkbox" id="cls-5" value="5">
+                                  <label class="form-check-label" for="cls-5">5</label>
+                                </div>
+                                <div class="form-check">
+                                  <input class="form-check-input class-opt" type="checkbox" id="cls-6" value="6">
+                                  <label class="form-check-label" for="cls-6">6</label>
+                                </div>
+                                <div class="form-check">
+                                  <input class="form-check-input class-opt" type="checkbox" id="cls-7" value="7">
+                                  <label class="form-check-label" for="cls-7">7</label>
+                                </div>
+                                <div class="form-check">
+                                  <input class="form-check-input class-opt" type="checkbox" id="cls-8" value="8">
+                                  <label class="form-check-label" for="cls-8">8</label>
+                                </div>
+                                <div class="form-check">
+                                  <input class="form-check-input class-opt" type="checkbox" id="cls-9" value="9">
+                                  <label class="form-check-label" for="cls-9">9</label>
+                                </div>
+                                <div class="form-check">
+                                  <input class="form-check-input class-opt" type="checkbox" id="cls-10" value="10">
+                                  <label class="form-check-label" for="cls-10">10</label>
+                                </div>
+                                <div class="form-check">
+                                  <input class="form-check-input class-opt" type="checkbox" id="cls-11" value="11">
+                                  <label class="form-check-label" for="cls-11">11</label>
+                                </div>
+                                <div class="form-check">
+                                  <input class="form-check-input class-opt" type="checkbox" id="cls-12" value="12">
+                                  <label class="form-check-label" for="cls-12">12</label>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- Hidden field bound to Teacher.department to avoid backend changes. Stores CSV of classes. -->
+                            <input type="hidden" th:field="*{department}" id="teacherClasses">
+                            <div class="form-text">Choose one or more classes (5–12). The teacher can handle the same subject across these classes.</div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary" sec:authorize="hasAuthority('PERM_H')">Save</button>
+                            <a class="btn btn-outline-secondary" th:href="@{/students}">Back to Students</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function(){
+    // Auto-fill from Keycloak user
+    const kcSel = document.getElementById('kcTeacherSelect');
+    const tName = document.getElementById('teacherName');
+    const tEmail = document.getElementById('teacherEmail');
+    if (kcSel) {
+      kcSel.addEventListener('change', function(){
+        const v = this.value || '';
+        const parts = v.split('||');
+        if (parts.length === 2) {
+          const username = parts[0];
+          const email = parts[1];
+          if (tName) tName.value = username;
+          if (tEmail) tEmail.value = email;
+        }
+      });
+    }
+    const toggle = document.getElementById('toggleNewSubject');
+    const existing = document.getElementById('existingSubject');
+    const code = document.getElementById('newSubjectCode');
+    const name = document.getElementById('newSubjectName');
+    function setMode(createNew){
+      if (createNew){
+        existing.setAttribute('disabled','disabled');
+        existing.removeAttribute('required');
+        code.removeAttribute('disabled');
+        name.removeAttribute('disabled');
+      } else {
+        existing.removeAttribute('disabled');
+        existing.setAttribute('required','required');
+        code.setAttribute('disabled','disabled');
+        name.setAttribute('disabled','disabled');
+        code.value = '';
+        name.value = '';
+      }
+    }
+    if (toggle){
+      toggle.addEventListener('change', function(){ setMode(this.checked); });
+    }
+    // Sync checkbox dropdown to hidden field and show selected text
+    const hiddenClasses = document.getElementById('teacherClasses');
+    const classChecks = document.querySelectorAll('.class-opt');
+    const classBtnText = document.getElementById('classDropdownText');
+    function updateClassSelectionFromHidden(){
+      if (!hiddenClasses) return;
+      const setVals = new Set((hiddenClasses.value || '').split(',').map(v => v.trim()).filter(Boolean));
+      classChecks.forEach(chk => { chk.checked = setVals.has(chk.value); });
+      renderClassButtonText();
+    }
+    function renderClassButtonText(){
+      const selected = [...classChecks].filter(c => c.checked).map(c => c.value);
+      if (classBtnText){
+        classBtnText.textContent = selected.length ? selected.join(', ') : 'Select classes';
+      }
+    }
+    function syncHiddenFromChecks(){
+      const selected = [...classChecks].filter(c => c.checked).map(c => c.value);
+      if (hiddenClasses) hiddenClasses.value = selected.join(',');
+      renderClassButtonText();
+    }
+    if (classChecks.length){
+      classChecks.forEach(c => c.addEventListener('change', syncHiddenFromChecks));
+    }
+    // Initialize from hidden value (edit mode) and ensure button text reflects current selection
+    updateClassSelectionFromHidden();
+  })();
+</script>
+</body>
+</html>
