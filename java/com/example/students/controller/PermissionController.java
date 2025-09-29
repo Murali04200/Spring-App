@@ -30,9 +30,14 @@ public class PermissionController {
     // List all permissions (requires E: VIEW_REPORTS)
     @GetMapping
     @RequirePermission("E")
-    public String listPermissions(Model model) {
+    public String listPermissions(Model model, Authentication authentication) {
         List<Permission> permissions = permissionService.getAllPermissions();
         model.addAttribute("permissions", permissions);
+        if (authentication != null) {
+            model.addAttribute("myPermissions", permissionService.getUserPermissions(authentication.getName()));
+        } else {
+            model.addAttribute("myPermissions", List.of());
+        }
         return "permissions"; // thymeleaf view
     }
 
@@ -40,10 +45,16 @@ public class PermissionController {
     @GetMapping("/user/{username}")
     @RequirePermission("G")
     public String viewUserPermissions(@PathVariable String username, Model model) {
-        model.addAttribute("username", username);
-        model.addAttribute("userPermissions", permissionService.getUserPermissionDetails(username));
-        model.addAttribute("allPermissions", permissionService.getActivePermissions());
-        return "user-permissions"; // thymeleaf view
+        try {
+            model.addAttribute("username", username);
+            model.addAttribute("userPermissions", permissionService.getUserPermissionDetails(username));
+            model.addAttribute("allPermissions", permissionService.getActivePermissions());
+            return "user-permissions"; // thymeleaf view
+        } catch (RuntimeException ex) {
+            model.addAttribute("error", "User not found: " + username);
+            model.addAttribute("permissions", permissionService.getAllPermissions());
+            return "permissions";
+        }
     }
 
     // Render create-permission form (F)

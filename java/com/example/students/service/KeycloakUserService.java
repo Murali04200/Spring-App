@@ -2,12 +2,17 @@ package com.example.students.service;
 
 import com.example.students.model.KeycloakUser;
 import com.example.students.repo.KeycloakUserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class KeycloakUserService {
+
+    private static final Logger log = LoggerFactory.getLogger(KeycloakUserService.class);
 
     private final KeycloakUserRepository repository;
 
@@ -29,7 +34,11 @@ public class KeycloakUserService {
     }
 
     public void deleteById(Long id) {
-        repository.deleteById(id);
+        try {
+            repository.deleteById(id);
+        } catch (EmptyResultDataAccessException ex) {
+            log.debug("KeycloakUser with id {} already removed: {}", id, ex.getMessage());
+        }
     }
 
     public KeycloakUser findByKeycloakId(String keycloakId) {

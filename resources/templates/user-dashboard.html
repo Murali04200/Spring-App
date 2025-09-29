@@ -114,7 +114,10 @@
     <a href="/user/dashboard"><i class="bi bi-house-fill"></i> Dashboard</a>
     <a href="/students"><i class="bi bi-people-fill"></i> Student List</a>
     <a href="#" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="bi bi-person-circle"></i> My Profile</a>
-    <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    <form th:action="@{/logout}" method="post" class="m-0 p-0">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+      <button type="submit" class="btn btn-link text-decoration-none ps-0 text-start w-100"><i class="bi bi-box-arrow-right"></i> Logout</button>
+    </form>
 </div>
 
 <!-- Page Content -->
@@ -131,14 +134,38 @@
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="btn btn-gradient d-flex align-items-center gap-2" th:href="@{/logout}">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </a>
+                      <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="btn btn-gradient d-flex align-items-center gap-2">
+                          <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                      </form>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12" th:if="${hasTeacherProfile == false}">
+            <div class="alert alert-warning shadow-sm d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="alert-heading mb-1">Complete your teacher profile</h5>
+                    <p class="mb-0">Create or update your teacher profile to keep your assignment details up to date.</p>
+                </div>
+                <a class="btn btn-primary" th:href="@{/teacher/details/me}"><i class="bi bi-person-badge"></i> View Profile</a>
+            </div>
+        </div>
+        <div class="col-12" th:if="${marksCount == 0}">
+            <div class="alert alert-info shadow-sm d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="alert-heading mb-1">No marks recorded yet</h5>
+                    <p class="mb-0">Start recording student marks for your classes to see them here.</p>
+                </div>
+                <a class="btn btn-primary" th:href="@{/teacher/marks}"><i class="bi bi-journal-plus"></i> Enter Marks</a>
+            </div>
+        </div>
+    </div>
 
     <div class="row g-4 justify-content-center">
         <!-- Card: Student List -->

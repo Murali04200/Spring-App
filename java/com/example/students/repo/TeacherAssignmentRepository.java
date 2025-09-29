@@ -13,4 +13,5 @@ public interface TeacherAssignmentRepository extends JpaRepository<TeacherAssign
     List<TeacherAssignment> findBySubject(Subject subject);
     Optional<TeacherAssignment> findByTeacherAndSubject(Teacher teacher, Subject subject);
     Optional<TeacherAssignment> findByTeacherAndSubjectAndClassName(Teacher teacher, Subject subject, String className);
+    void deleteByTeacher(Teacher teacher);
 }

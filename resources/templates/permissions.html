@@ -65,7 +65,7 @@
 
 <div class="container py-4">
 
-<div class="card mb-4">
+<div class="card mb-4" sec:authorize="hasAuthority('PERM_G')">
     <div class="card-body">
         <div class="d-flex flex-column flex-md-row gap-3 justify-content-between align-items-md-center mb-3">
             <h5 class="mb-0">All Permissions</h5>
@@ -101,7 +101,7 @@
             </table>
         </div>
     </div>
-<div class="card" sec:authorize="hasAuthority('PERM_I')">
+<div class="card" sec:authorize="hasAuthority('PERM_G')">
     <div class="card-body">
         <h5 class="mb-3">View User Permissions</h5>
         <form class="row g-2" onsubmit="viewUserPerms(event)">
@@ -114,6 +114,29 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body text-center">
+        <h5 class="mb-3">Your Permissions</h5>
+        <div class="d-inline-flex flex-wrap justify-content-center gap-2" th:if="${!#lists.isEmpty(myPermissions)}">
+            <span class="badge bg-primary" th:each="perm : ${myPermissions}" th:text="${perm}">PERM_X</span>
+        </div>
+        <div class="d-inline-flex flex-wrap justify-content-center gap-2" th:if="${#lists.isEmpty(myPermissions)}">
+            <span class="badge bg-primary" th:each="auth : ${#authentication.authorities}" th:text="${auth}">ROLE_user</span>
+            <span th:if="${#lists.isEmpty(#authentication.authorities)}" class="text-muted">No active permissions.</span>
+        </div>
+    </div>
+</div>
+
+<div class="card" sec:authorize="hasAuthority('PERM_G')">
+
+<div class="card" sec:authorize="hasAuthority('PERM_E') and !hasAuthority('PERM_G')">
+    <div class="card-body text-center">
+        <h5 class="mb-3">Student Details</h5>
+        <p class="text-muted mb-4">You can view student information but cannot modify user permissions.</p>
+        <a class="btn btn-primary" th:href="@{/students}"><i class="bi bi-people"></i> Go to Students</a>
     </div>
 </div>
 

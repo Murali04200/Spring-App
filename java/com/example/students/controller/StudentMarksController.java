@@ -1,5 +1,6 @@
 package com.example.students.controller;
 
+import com.example.students.annotation.RequirePermission;
 import com.example.students.model.Student;
 import com.example.students.model.SubjectMark;
 import com.example.students.repo.SubjectRepository;
@@ -34,6 +35,7 @@ public class StudentMarksController {
     }
 
     @GetMapping("/{id}/details")
+    @RequirePermission("E")
     public String details(@PathVariable Long id, Model model) {
         Student student = studentService.findById(id);
         List<SubjectMark> marks = subjectMarkService.getMarksForStudent(id);

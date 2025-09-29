@@ -353,8 +353,16 @@ public class KeycloakService {
         webClient.delete()
                 .uri("/admin/realms/" + realm + "/users/{id}", userId)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                .retrieve()
-                .toBodilessEntity()
+                .exchangeToMono(response -> {
+                    if (response.statusCode().is2xxSuccessful() || response.statusCode().value() == 404) {
+                        return Mono.empty();
+                    }
+                    return response.bodyToMono(String.class)
+                            .defaultIfEmpty("")
+                            .flatMap(err -> Mono.error(new RuntimeException(
+                                    "User deletion failed: " + response.statusCode() + " → " + err
+                            )));
+                })
                 .block();
     }
 

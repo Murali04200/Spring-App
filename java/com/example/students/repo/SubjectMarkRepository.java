@@ -19,6 +19,10 @@ public interface SubjectMarkRepository extends JpaRepository<SubjectMark, Long> 
     @Query("delete from SubjectMark sm where sm.student.id = :studentId")
     void deleteByStudentId(@Param("studentId") Long studentId);
 
+    @Modifying
+    @Query("delete from SubjectMark sm where sm.teacher.id = :teacherId")
+    void deleteByTeacherId(@Param("teacherId") Long teacherId);
+
     // Fetch marks for a given subject code and teacher email
     List<SubjectMark> findBySubject_CodeAndTeacher_Email(String subjectCode, String email);
 }

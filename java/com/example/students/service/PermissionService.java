@@ -147,17 +147,26 @@ public class PermissionService {
             userPermissionRepository.save(userPermission);
         }
     }
-
     public void removePermissionFromUser(String username, String permissionCode) {
         KeycloakUser user = keycloakUserRepository.findByUsername(username);
         if (user == null) {
             throw new RuntimeException("User not found: " + username);
         }
-        
+
         Permission permission = permissionRepository.findByCode(permissionCode)
                 .orElseThrow(() -> new RuntimeException("Permission not found: " + permissionCode));
 
         userPermissionRepository.deleteByUserAndPermission(user, permission);
+    }
+
+    public void removePermissionsForUser(KeycloakUser user) {
+        if (user == null) {
+            return;
+        }
+        List<UserPermission> assignments = userPermissionRepository.findByUser(user);
+        if (!assignments.isEmpty()) {
+            userPermissionRepository.deleteAll(assignments);
+        }
     }
 
     public List<String> getUserPermissions(String username) {

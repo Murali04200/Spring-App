@@ -25,6 +25,84 @@
             border-radius: 16px;
             box-shadow: 0 6px 18px rgba(0,0,0,0.15);
         }
+        /* Filter bar styles */
+        .filter-bar {
+            background: rgba(255,255,255,0.65);
+            border: 1px solid rgba(255,255,255,0.35);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-radius: 14px;
+            padding: 10px 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .select-with-icon {
+            position: relative;
+            min-width: 200px;
+        }
+        .select-with-icon .icon-badge {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px; height: 22px;
+            border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #fff; font-size: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,.12);
+            pointer-events: none;
+        }
+        .select-with-icon select {
+            padding-left: 48px;
+        }
+        .btn-add-student {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff !important;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+            box-shadow: 0 10px 22px rgba(34,197,94,.25);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-add-student:hover { filter: brightness(.98); color: #fff; }
+        .search-input {
+            min-width: 240px;
+            border-radius: 999px;
+            padding-left: 36px !important;
+            box-shadow: inset 0 1px 2px rgba(15,23,42,.08);
+        }
+        .search-wrapper {
+            position: relative;
+        }
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .chip-filter {
+            border-radius: 999px;
+            border: 1px solid rgba(37,99,235,.25);
+            padding: 6px 14px;
+            background: rgba(255,255,255,.8);
+            color: #1f2937;
+            cursor: pointer;
+            transition: .2s;
+            box-shadow: 0 4px 10px rgba(15,23,42,.08);
+        }
+        .chip-filter.active {
+            background: linear-gradient(135deg,#2563eb,#7c3aed);
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(37,99,235,.25);
+        }
         .table thead {
             background: linear-gradient(90deg, #3b82f6, #60a5fa);
             color: white;
@@ -56,51 +134,66 @@
 
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="#">
-            <i class="bi bi-mortarboard-fill me-2"></i> Students App
+  <div class="container py-2">
+    <div class="d-flex align-items-center w-100">
+      <!-- Left: Back -->
+      <div class="d-flex align-items-center" style="width:120px;">
+        <a class="fw-semibold d-flex align-items-center gap-2 text-white text-decoration-none"
+           th:href="@{/admin/dashboard}"
+           sec:authorize="hasAnyAuthority('PERM_A','PERM_B','PERM_C','PERM_D','PERM_E')">
+          <i class="bi bi-arrow-left-circle"></i>
+          Back
         </a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto align-items-center gap-2">
-                <li class="nav-item" sec:authorize="hasAnyAuthority('PERM_A','PERM_B','PERM_C','PERM_D','PERM_E')">
-                    <a class="btn btn-warning fw-bold me-3 d-flex align-items-center gap-2" th:href="@{/admin/dashboard}">
-                        <i class="bi bi-arrow-left-circle"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item" sec:authorize="!hasAnyAuthority('PERM_A','PERM_B','PERM_C','PERM_D','PERM_E')">
-                    <a class="btn btn-warning fw-bold me-3 d-flex align-items-center gap-2" th:href="@{/user/dashboard}">
-                        <i class="bi bi-arrow-left-circle"></i> Dashboard
-                    </a>
-                </li>
-                <!-- Profile modal trigger -->
-                <li class="nav-item">
-                    <button type="button" class="btn d-flex align-items-center justify-content-center"
-                            data-bs-toggle="modal" data-bs-target="#profileModal"
-                            style="width:38px;height:38px;border-radius:50%;
-                                   background: linear-gradient(135deg,#7c3aed,#2563eb);
-                                   color:#fff; box-shadow:0 6px 14px rgba(0,0,0,.25)">
-                        <i class="bi bi-person-fill"></i>
-                    </button>
-                </li>
-            </ul>
-        </div>
+        <a class="fw-semibold d-flex align-items-center gap-2 text-white text-decoration-none"
+           th:href="@{/user/dashboard}"
+           sec:authorize="!hasAnyAuthority('PERM_A','PERM_B','PERM_C','PERM_D','PERM_E')">
+          <i class="bi bi-arrow-left-circle"></i>
+          Back
+        </a>
+      </div>
+
+      <!-- Center: App title with icon -->
+      <div class="flex-grow-1 text-center">
+        <a class="navbar-brand fw-bold m-0 d-inline-flex align-items-center gap-2" href="#">
+          <i class="bi bi-mortarboard-fill"></i>
+          <span>Students App</span>
+        </a>
+      </div>
+
+      <!-- Right: Profile -->
+      <div class="d-flex align-items-center gap-2" style="width:120px; justify-content: end;">
+        <button type="button" class="btn d-flex align-items-center justify-content-center"
+                data-bs-toggle="modal" data-bs-target="#profileModal"
+                style="width:38px;height:38px;border-radius:50%;
+                       background: linear-gradient(135deg,#7c3aed,#2563eb);
+                       color:#fff; box-shadow:0 6px 14px rgba(0,0,0,.25)">
+          <i class="bi bi-person-fill"></i>
+        </button>
+      </div>
     </div>
+  </div>
 </nav>
 
 <!-- Content -->
 <div class="container mt-5">
 
     <!-- Actions header -->
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h2 class="mb-0 text-dark fw-bold">Student List</h2>
-        <div class="d-flex align-items-center gap-2">
-          <label class="form-label mb-0 me-2">Class</label>
-          <select id="filterClass" class="form-select form-select-sm" style="min-width:160px;">
-            <option value="" selected>All Classes</option>
-          </select>
-          <a class="btn btn-primary" href="/students/new" sec:authorize="hasAuthority('PERM_A')">
-              <i class="bi bi-person-plus-fill"></i> Add Student
-          </a>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+        <h2 class="mb-0 text-dark fw-bold d-flex align-items-center gap-2">
+            <span class="badge bg-primary bg-gradient" style="border-radius:10px;"><i class="bi bi-people-fill"></i></span>
+            Student List
+        </h2>
+        <div class="filter-bar d-flex flex-wrap align-items-center gap-3">
+            <div class="search-wrapper">
+                <i class="bi bi-search"></i>
+                <input id="searchInput" type="search" class="form-control form-control-sm search-input" placeholder="Search name or email">
+            </div>
+            <div class="chip-group" id="classChipContainer"></div>
+            <button id="clearFilters" type="button" class="btn btn-sm btn-outline-secondary">Clear</button>
+            <a class="btn btn-add-student" href="/students/new" sec:authorize="hasAuthority('PERM_A')">
+                <i class="bi bi-person-plus-fill"></i>
+                <span>Add Student</span>
+            </a>
         </div>
     </div>
 
@@ -245,8 +338,11 @@
         const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
         const successMessage = document.getElementById("successMessage");
         const successText = document.getElementById("successText");
-        const filterClass = document.getElementById("filterClass");
+        const searchInput = document.getElementById("searchInput");
+        const classChipContainer = document.getElementById("classChipContainer");
+        const clearFiltersBtn = document.getElementById("clearFilters");
         const studentsBody = document.getElementById("studentsBody");
+        const selectedClasses = new Set();
 
         // ✅ Delete Handler
         deleteModal.addEventListener("show.bs.modal", function (event) {
@@ -348,34 +444,63 @@
 
         // ✅ Build class filter options from table rows
         function buildClassFilter() {
-            if (!filterClass || !studentsBody) return;
+            if (!classChipContainer || !studentsBody) return;
+            classChipContainer.innerHTML = "";
             const classes = new Set();
             studentsBody.querySelectorAll('tr').forEach(tr => {
                 const cls = tr.getAttribute('data-class');
                 if (cls && cls.trim() !== '') classes.add(cls.trim());
             });
-            // Remove dynamic options
-            while (filterClass.options.length > 1) filterClass.remove(1);
             Array.from(classes).sort().forEach(c => {
-                const o = document.createElement('option');
-                o.value = c; o.textContent = c; filterClass.appendChild(o);
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'chip-filter btn btn-light btn-sm';
+                chip.textContent = c;
+                if (selectedClasses.has(c)) chip.classList.add('active');
+                chip.addEventListener('click', () => {
+                    if (selectedClasses.has(c)) {
+                        selectedClasses.delete(c);
+                        chip.classList.remove('active');
+                    } else {
+                        selectedClasses.add(c);
+                        chip.classList.add('active');
+                    }
+                    persistFilters();
+                    applyFilters();
+                });
+                classChipContainer.appendChild(chip);
             });
         }
 
-        // ✅ Filter rows by class
-        function applyClassFilter() {
-            const sel = filterClass.value;
+        function applyFilters() {
+            const query = (searchInput.value || '').trim().toLowerCase();
             studentsBody.querySelectorAll('tr').forEach(tr => {
                 const cls = (tr.getAttribute('data-class') || '').trim();
-                tr.style.display = (!sel || cls === sel) ? '' : 'none';
+                const name = tr.children[2]?.innerText?.toLowerCase() || '';
+                const email = tr.children[3]?.innerText?.toLowerCase() || '';
+
+                const classMatches = selectedClasses.size === 0 || selectedClasses.has(cls);
+                const searchMatches = !query || name.includes(query) || email.includes(query);
+
+                tr.style.display = classMatches && searchMatches ? '' : 'none';
+            });
+            updateSerialNumbers();
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                persistFilters();
+                applyFilters();
             });
         }
 
-        if (filterClass) {
-            filterClass.addEventListener('change', function(){
-                applyClassFilter();
-                updateSerialNumbers();
-                try { localStorage.setItem('students_classFilter', filterClass.value || ''); } catch(e) {}
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => {
+                selectedClasses.clear();
+                searchInput.value = '';
+                Array.from(classChipContainer.querySelectorAll('.chip-filter')).forEach(chip => chip.classList.remove('active'));
+                persistFilters();
+                applyFilters();
             });
         }
 
@@ -400,15 +525,25 @@
         }
 
         sortTable(); // initial sort on load
+        restoreFilters();
         buildClassFilter();
-        try {
-            const saved = localStorage.getItem('students_classFilter');
-            if (saved && [...filterClass.options].some(o => o.value === saved)) {
-                filterClass.value = saved;
-            }
-        } catch(e) {}
-        applyClassFilter();
-        updateSerialNumbers();
+        applyFilters();
+
+        function persistFilters(){
+            try {
+                localStorage.setItem('students_selectedClasses', JSON.stringify(Array.from(selectedClasses)));
+                localStorage.setItem('students_searchQuery', searchInput.value || '');
+            } catch(error) {}
+        }
+
+        function restoreFilters(){
+            try {
+                const savedClasses = JSON.parse(localStorage.getItem('students_selectedClasses') || '[]');
+                savedClasses.forEach(c => selectedClasses.add(c));
+                const savedQuery = localStorage.getItem('students_searchQuery');
+                if (savedQuery) searchInput.value = savedQuery;
+            } catch(error) {}
+        }
     });
 </script>
 

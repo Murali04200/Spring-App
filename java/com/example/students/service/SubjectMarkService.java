@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SubjectMarkService {
@@ -66,6 +67,54 @@ public class SubjectMarkService {
         return subjectMarkRepository.findBySubject_CodeAndTeacher_Email(subjectCode, teacherEmail);
     }
 
+    @Transactional(readOnly = true)
+    public long totalMarksCount() {
+        return subjectMarkRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubjectCount> marksCountBySubject() {
+        return subjectMarkRepository.findAll().stream()
+                .collect(Collectors.groupingBy(sm -> sm.getSubject().getCode(), Collectors.counting()))
+                .entrySet().stream()
+                .map(entry -> new SubjectCount(entry.getKey(), entry.getValue()))
+                .sorted((a, b) -> a.code().compareToIgnoreCase(b.code()))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecentMark> recentMarks(int limit) {
+        return subjectMarkRepository.findAll().stream()
+                .sorted((a, b) -> Long.compare(b.getId(), a.getId()))
+                .limit(limit)
+                .map(sm -> new RecentMark(
+                        sm.getStudent().getName(),
+                        sm.getSubject().getCode(),
+                        sm.getSubject().getName(),
+                        sm.getTeacher().getName(),
+                        sm.getMark()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecentMark> recentMarksForTeacher(String subjectCode, String teacherEmail, int limit) {
+        if (subjectCode == null || teacherEmail == null) {
+            return List.of();
+        }
+        return subjectMarkRepository.findBySubject_CodeAndTeacher_Email(subjectCode, teacherEmail).stream()
+                .sorted((a, b) -> Long.compare(b.getId(), a.getId()))
+                .limit(limit)
+                .map(sm -> new RecentMark(
+                        sm.getStudent().getName(),
+                        sm.getSubject().getCode(),
+                        sm.getSubject().getName(),
+                        sm.getTeacher().getName(),
+                        sm.getMark()
+                ))
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public void recomputeAndPersistTotal(Student student) {
         List<SubjectMark> marks = subjectMarkRepository.findByStudent(student);
@@ -78,4 +127,7 @@ public class SubjectMarkService {
         }
         studentRepository.save(student);
     }
+
+    public record SubjectCount(String code, long count) {}
+    public record RecentMark(String studentName, String subjectCode, String subjectName, String teacherName, Integer mark) {}
 }

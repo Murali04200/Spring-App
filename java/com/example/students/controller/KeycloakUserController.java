@@ -124,6 +124,7 @@ public class KeycloakUserController {
     public String deleteUser(@PathVariable Long id) {
         KeycloakUser user = keycloakUserService.findById(id);
 
+        permissionService.removePermissionsForUser(user);
         keycloakService.deleteUser(user.getKeycloakId());
         keycloakUserService.deleteById(id);
 
